@@ -46,6 +46,11 @@ export class Config implements IConfig {
     public consensus: ConsensusConfig;
 
     /**
+     * SeedData config
+     */
+    public seedData: SeedDataConfig;
+
+    /**
      * Constructor
      */
     constructor() {
@@ -53,6 +58,7 @@ export class Config implements IConfig {
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
         this.consensus = new ConsensusConfig();
+        this.seedData = new SeedDataConfig();
     }
 
     /**
@@ -74,6 +80,7 @@ export class Config implements IConfig {
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
         this.consensus.readFromObject(cfg.consensus);
+        this.seedData.readFromObject(cfg.seedData);
     }
 
     /**
@@ -419,6 +426,72 @@ export class ConsensusConfig implements IConsensusConfig {
 }
 
 /**
+ * Consensus config
+ */
+ // tslint:disable-next-line:max-classes-per-file
+ export class SeedDataConfig implements ISeedDataConfig {
+
+    /**
+     * Boolean to insert data
+     */
+     public seed: boolean;
+    /**
+     * The iterator
+     */
+     public iterator: number;
+    /**
+     * The genesis timestamp
+     */
+     public genesis_timestamp: number;
+
+    /**
+     * Constructor
+     * @param seed Boolean
+     * @param iterator The iterator
+     * @param genesis_timestamp The genesis timestamp
+     */
+    constructor(
+        seed?: string,
+        iterator?: number,
+        genesis_timestamp?: number
+     ) {
+        const conf = extend(true, {}, SeedDataConfig.defaultValue());
+        extend(true, conf, {
+            seed,
+            iterator,
+            genesis_timestamp,
+        });
+        this.seed = conf.seed;
+        this.iterator = conf.iterator;
+        this.genesis_timestamp = conf.genesis_timestamp;
+    }
+
+    /**
+     * Reads from Object
+     * @param config The object of ISeedDataConfig
+     */
+    public readFromObject(config: ISeedDataConfig) {
+        const conf = extend(true, {}, SeedDataConfig.defaultValue());
+        extend(true, conf, config);
+        this.seed = conf.seed;
+        this.iterator = conf.iterator;
+        this.genesis_timestamp = conf.genesis_timestamp;
+    }
+
+    /**
+     * Returns default value
+     */
+     public static defaultValue(): ISeedDataConfig {
+        return {
+            seed: false,
+            iterator: 0,
+            genesis_timestamp: 1111,
+        };
+    }
+ }
+
+
+/**
  * The interface of server config
  */
 export interface IServerConfig {
@@ -536,6 +609,24 @@ export interface IConsensusConfig {
 }
 
 /**
+ * The interface of consensus config
+ */
+ export interface ISeedDataConfig {
+    /**
+     * Boolean to insert data
+     */
+     seed: boolean;
+    /**
+     * The iterator
+     */
+     iterator: number;
+    /**
+     * The genesis timestamp
+     */
+     genesis_timestamp: number;
+}
+
+/**
  * The interface of main config
  */
 export interface IConfig {
@@ -558,4 +649,9 @@ export interface IConfig {
      * Consensus config
      */
     consensus: IConsensusConfig;
+
+    /**
+     * SeedData config
+     */
+     seedData: ISeedDataConfig;
 }

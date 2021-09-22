@@ -37,6 +37,7 @@ import {
 } from "boa-sdk-ts";
 import moment from "moment";
 import * as mysql from "mysql2";
+import { GenerateSeedData } from "../../seedData";
 import { IAccountInformation, IMarketCap } from "../../Types";
 import { IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
@@ -357,8 +358,12 @@ export class LedgerStorage extends Storages {
      * is called with an error.
      */
     public putBlocks(block: Block): Promise<void> {
-        const genesis_timestamp: number = this.genesis_timestamp;
 
+        // Generating new genesis_timestamp for seed data.
+        const new_genesis_timestamp = new GenerateSeedData().changeGenesisTimeStamp(block.txs.length);
+        if (new_genesis_timestamp !== 0) this.genesis_timestamp=new_genesis_timestamp;
+
+        const genesis_timestamp: number = this.genesis_timestamp;
         function saveBlock(
             storage: LedgerStorage,
             block: Block,
@@ -448,35 +453,35 @@ export class LedgerStorage extends Storages {
         ) {
             return new Promise<void>((resolve, reject) => {
                 storage
-                    .query(
-                        `INSERT INTO fees
-                        ( height, time_stamp, granularity,  average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
-                    VALUES
-                        (?,?,?,?,?,?,?)
-                    ON DUPLICATE KEY
-                    UPDATE
-                        height = VALUES(height),
-                        average_tx_fee = VALUES(average_tx_fee),
-                        total_tx_fee = VALUES(total_tx_fee),
-                        total_payload_fee = VALUES(total_payload_fee),
-                        total_fee = VALUES(total_fee)`,
-                        [
-                            height.value.toString(),
-                            time_stamp.toString(),
-                            granularity.toString(),
-                            average_tx_fee.toString(),
-                            total_tx_fee.toString(),
-                            total_payload_fee.toString(),
-                            total_fee.toString(),
-                        ],
-                        conn
-                    )
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    });
+                .query(
+                    `INSERT INTO fees
+                    ( height, time_stamp, granularity,  average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                VALUES
+                    (?,?,?,?,?,?,?)
+                ON DUPLICATE KEY
+                UPDATE
+                    height = VALUES(height),
+                    average_tx_fee = VALUES(average_tx_fee),
+                    total_tx_fee = VALUES(total_tx_fee),
+                    total_payload_fee = VALUES(total_payload_fee),
+                    total_fee = VALUES(total_fee)`,
+                    [
+                        height.value.toString(),
+                        time_stamp.toString(),
+                        granularity.toString(),
+                        average_tx_fee.toString(),
+                        total_tx_fee.toString(),
+                        total_payload_fee.toString(),
+                        total_fee.toString(),
+                    ],
+                    conn
+                )
+                .then(() => {
+                    resolve();
+                })
+                .catch((err) => {
+                    reject(err);
+                });
             });
         }
         return new Promise<void>(async (resolve, reject) => {
